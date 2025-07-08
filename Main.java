@@ -1,80 +1,83 @@
-package main;
-
+import model.Student;
 import service.StudentService;
-
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         StudentService service = new StudentService();
         Scanner sc = new Scanner(System.in);
-        displayMenu(service, sc);
-    }
 
-    private static void displayMenu(StudentService service, Scanner sc) {
-        int choice;
-        do {
-            System.out.println("\n--- Student Management ---");
+        while (true) {
+            System.out.println("\n--- MENU ---");
             System.out.println("1. Add Student");
-            System.out.println("2. Delete Student");
-            System.out.println("3. Search Student");
-            System.out.println("4. Display All Students");
-            System.out.println("0. Exit");
-            System.out.print("Enter your choice: ");
-            choice = Integer.parseInt(sc.nextLine());
+            System.out.println("2. Delete Student By Id");
+            System.out.println("3. Search for students by name");
+            System.out.println("4. Display the list of students");
+            System.out.println("5. Out");
+            System.out.print("Choose: ");
 
-            switch (choice) {
-                case 1:
-                    handleAddStudent(service, sc);
-                    break;
-                case 2:
-                    handleDeleteStudent(service, sc);
-                    break;
-                case 3:
-                    handleSearchStudent(service, sc);
-                    break;
-                case 4:
-                    service.displayAllStudents();
-                    break;
-                case 0:
-                    System.out.println("Exiting...");
-                    break;
-                default:
-                    System.out.println("Invalid choice. Try again.");
+            int choice;
+            try {
+                choice = Integer.parseInt(sc.nextLine());
+            } catch (Exception e) {
+                System.out.println(" Please enter a valid number.");
+                continue;
             }
-        } while (choice != 0);
-    }
 
-    private static void handleAddStudent(StudentService service, Scanner sc) {
-        System.out.print("Enter Student ID: ");
-        int id = Integer.parseInt(sc.nextLine());
-        System.out.print("Enter Full Name: ");
-        String name = sc.nextLine();
-        System.out.print("Enter GPA: ");
-        double gpa = Double.parseDouble(sc.nextLine());
+            try {
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter ID: ");
+                        int id = Integer.parseInt(sc.nextLine());
 
-        try {
-            service.addStudent(id, name, gpa);
-            System.out.println("Student added successfully.");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+                        System.out.print("Enter Name: ");
+                        String name = sc.nextLine();
+
+                        System.out.print("Enter GPA: ");
+                        double gpa = Double.parseDouble(sc.nextLine());
+
+                        Student student = new Student(id, name, gpa);
+                        service.addStudent(student);
+                        System.out.println(" Add Success!");
+                        break;
+
+                    case 2:
+                        System.out.print("Enter the Id to delete: ");
+                        int deleteId = Integer.parseInt(sc.nextLine());
+                        if (service.deleteStudentById(deleteId)) {
+                            System.out.println(" Deleted.");
+                        } else {
+                            System.out.println(" Student not found.");
+                        }
+                        break;
+
+                    case 3:
+                        System.out.print("Enter the name to search: ");
+                        String keyword = sc.nextLine();
+                        var result = service.searchStudentByName(keyword);
+                        if (result.isEmpty()) {
+                            System.out.println(" Not found.");
+                        } else {
+                            result.forEach(System.out::println);
+                        }
+                        break;
+
+                    case 4:
+                        service.displayAllStudents();
+                        break;
+
+                    case 5:
+                        System.out.println(" Goodbye!");
+                        return;
+
+                    default:
+                        System.out.println(" Invalid choice. Please choose again.");
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println(" Error: " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println(" Unexpected error: " + e.getMessage());
+            }
         }
-    }
-
-    private static void handleDeleteStudent(StudentService service, Scanner sc) {
-        System.out.print("Enter Student ID to delete: ");
-        int id = Integer.parseInt(sc.nextLine());
-        boolean deleted = service.deleteStudent(id);
-        if (deleted) {
-            System.out.println("Student deleted successfully.");
-        } else {
-            System.out.println("Student not found.");
-        }
-    }
-
-    private static void handleSearchStudent(StudentService service, Scanner sc) {
-        System.out.print("Enter name to search: ");
-        String name = sc.nextLine();
-        service.searchStudent(name);
     }
 }
